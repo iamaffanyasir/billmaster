@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoices - BillMaster</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/theme.css">
+</head>
+<body>
+    <%- include('../partials/nav.ejs') %>
+
+    <main>
+        <div class="container">
+            <section class="invoice-header">
+                <div class="section-header">
+                    <div class="header-content">
+                        <h2>Invoice Management</h2>
+                        <a href="/invoices/new" class="btn btn-primary">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            Create New Invoice
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <section class="invoice-list">
+                <div class="table-container">
+                    <% if (invoices && invoices.length > 0) { %>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width: 15%">Invoice #</th>
+                                    <th style="width: 20%">Client</th>
+                                    <th style="width: 15%">Amount</th>
+                                    <th style="width: 15%">Due Date</th>
+                                    <th style="width: 15%">Status</th>
+                                    <th style="width: 20%">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% invoices.forEach(function(invoice) { %>
+                                    <tr>
+                                        <td><%= invoice.invoiceNumber %></td>
+                                        <td><%= invoice.clientName %></td>
+                                        <td class="amount">₹<%= invoice.amount.toLocaleString() %></td>
+                                        <td><%= new Date(invoice.dueDate).toLocaleDateString() %></td>
+                                        <td>
+                                            <span class="status-badge <%= invoice.status %>">
+                                                <%= invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1) %>
+                                            </span>
+                                        </td>
+                                        <td class="actions">
+                                            <div class="button-group">
+                                                <button class="btn btn-icon" onclick="viewInvoice('<%= invoice._id %>')" title="View">
+                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                                        <circle cx="12" cy="12" r="3"></circle>
+                                                    </svg>
+                                                </button>
+                                                <button class="btn btn-icon" onclick="sendReminder('<%= invoice._id %>')" title="Send Reminder">
+                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                                        <polyline points="22,6 12,13 2,6"></polyline>
+                                                    </svg>
+                                                </button>
+                                                <% if (invoice.status === 'pending') { %>
+                                                    <button class="btn btn-icon success" onclick="updateStatus('<%= invoice._id %>', 'paid')" title="Mark as Paid">
+                                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                                            <polyline points="20 6 9 17 4 12"></polyline>
+                                                        </svg>
+                                                    </button>
+                                                <% } else if (invoice.status === 'paid') { %>
+                                                    <button class="btn btn-icon warning" onclick="updateStatus('<%= invoice._id %>', 'pending')" title="Mark as Pending">
+                                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                                            <circle cx="12" cy="12" r="10"></circle>
+                                                            <line x1="12" y1="8" x2="12" y2="16"></line>
+                                                            <line x1="8" y1="12" x2="16" y2="12"></line>
+                                                        </svg>
+                                                    </button>
+                                                <% } %>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <% }); %>
+                            </tbody>
+                        </table>
+                    <% } else { %>
+                        <div class="no-data">
+                            <p>No invoices created yet.</p>
+                            <a href="/invoices/new" class="btn btn-primary">Create First Invoice</a>
+                        </div>
+                    <% } %>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 BillMaster. All rights reserved.</p>
+    </footer>
+
+    <script>
+        function viewInvoice(id) {
+            window.location.href = `/invoices/${id}`;
+        }
+
+        async function sendReminder(id) {
+            try {
+                const response = await fetch(`/invoices/${id}/resend`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    alert('Reminder sent successfully!');
+                } else {
+                    alert('Failed to send reminder: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to send reminder');
+            }
+        }
+
+        async function updateStatus(id, status) {
+            try {
+                if (!confirm(`Are you sure you want to mark this invoice as ${status}?`)) {
+                    return;
+                }
+
+                const response = await fetch(`/invoices/${id}/status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ status })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    throw new Error(data.message || 'Failed to update status');
+                }
+            } catch (error) {
+                console.error('Error updating status:', error);
+                alert('Failed to update status: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html> 

@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice #<%= invoice.invoiceNumber %> - BillMaster</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/theme.css">
+    <style>
+        /* Print-specific styles */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+                margin: 0;
+            }
+
+            nav, footer, .header-actions {
+                display: none !important;
+            }
+
+            .container {
+                max-width: 100%;
+                padding: 40px !important;
+            }
+
+            .invoice-print {
+                padding: 0 !important;
+                box-shadow: none !important;
+            }
+
+            .invoice-header {
+                border-bottom: 2px solid #eee;
+                padding-bottom: 20px;
+                margin-bottom: 30px;
+            }
+
+            .company-logo {
+                max-width: 200px;
+                margin-bottom: 20px;
+            }
+
+            .invoice-title {
+                font-size: 28px;
+                color: #333;
+                margin-bottom: 10px;
+            }
+
+            .invoice-meta {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 40px;
+            }
+
+            .invoice-parties {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 40px;
+            }
+
+            .party-info {
+                flex: 1;
+                max-width: 250px;
+            }
+
+            .party-info h4 {
+                color: #666;
+                margin-bottom: 10px;
+                font-size: 14px;
+                text-transform: uppercase;
+            }
+
+            .invoice-items table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-bottom: 40px;
+            }
+
+            .invoice-items th {
+                background: #f8f9fa;
+                padding: 12px;
+                text-align: left;
+                font-size: 14px;
+                color: #333;
+            }
+
+            .invoice-items td {
+                padding: 12px;
+                border-bottom: 1px solid #eee;
+            }
+
+            .invoice-summary {
+                display: flex;
+                justify-content: flex-end;
+                margin-top: 30px;
+            }
+
+            .summary-table {
+                width: 300px;
+            }
+
+            .summary-table tr td {
+                padding: 8px 0;
+            }
+
+            .summary-table tr.total td {
+                font-weight: bold;
+                font-size: 18px;
+                border-top: 2px solid #333;
+                padding-top: 12px;
+            }
+
+            .invoice-notes {
+                margin-top: 40px;
+                padding-top: 20px;
+                border-top: 1px solid #eee;
+            }
+
+            .payment-info {
+                margin-top: 30px;
+                background: #f8f9fa;
+                padding: 20px;
+                border-radius: 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <%- include('../partials/nav.ejs') %>
+
+    <main>
+        <div class="container">
+            <section class="invoice-details">
+                <div class="section-header">
+                    <div class="header-actions">
+                        <button class="btn btn-primary" onclick="window.print()">Print Invoice</button>
+                        <button class="btn btn-secondary" onclick="sendReminder('<%= invoice._id %>')">Send Reminder</button>
+                    </div>
+                </div>
+
+                <div class="invoice-print">
+                    <!-- Company Info -->
+                    <div class="invoice-header">
+                        <div class="company-logo">
+                            <!-- Add your company logo here -->
+                            <h1>BillMaster</h1>
+                        </div>
+                        <h2 class="invoice-title">INVOICE</h2>
+                    </div>
+
+                    <!-- Invoice Meta -->
+                    <div class="invoice-meta">
+                        <div>
+                            <p><strong>Invoice Number:</strong> <%= invoice.invoiceNumber %></p>
+                            <p><strong>Issue Date:</strong> <%= new Date(invoice.createdAt).toLocaleDateString() %></p>
+                            <p><strong>Due Date:</strong> <%= new Date(invoice.dueDate).toLocaleDateString() %></p>
+                        </div>
+                        <div>
+                            <span class="status-badge <%= invoice.status %>">
+                                <%= invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1) %>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Parties Info -->
+                    <div class="invoice-parties">
+                        <div class="party-info">
+                            <h4>From</h4>
+                            <p><strong>BillMaster Inc.</strong></p>
+                            <p>123 Business Street</p>
+                            <p>Business City, BC 12345</p>
+                            <p>contact@billmaster.com</p>
+                        </div>
+
+                        <div class="party-info">
+                            <h4>Bill To</h4>
+                            <p><strong><%= invoice.clientName %></strong></p>
+                            <p><%= invoice.clientEmail %></p>
+                            <p><strong>Project:</strong> <%= invoice.projectName %></p>
+                        </div>
+                    </div>
+
+                    <!-- Invoice Items -->
+                    <div class="invoice-items">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width: 40%">Description</th>
+                                    <th style="width: 20%">Quantity</th>
+                                    <th style="width: 20%">Rate</th>
+                                    <th style="width: 20%">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% invoice.items.forEach(function(item) { %>
+                                    <tr>
+                                        <td><%= item.description %></td>
+                                        <td><%= item.quantity %></td>
+                                        <td>₹<%= item.rate.toLocaleString() %></td>
+                                        <td>₹<%= item.amount.toLocaleString() %></td>
+                                    </tr>
+                                <% }); %>
+                            </tbody>
+                        </table>
+
+                        <!-- Summary -->
+                        <div class="invoice-summary">
+                            <table class="summary-table">
+                                <tr>
+                                    <td>Subtotal:</td>
+                                    <td align="right">₹<%= invoice.amount.toLocaleString() %></td>
+                                </tr>
+                                <tr class="total">
+                                    <td>Total:</td>
+                                    <td align="right">₹<%= invoice.amount.toLocaleString() %></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Notes and Payment Info -->
+                    <div class="invoice-notes">
+                        <h4>Notes</h4>
+                        <p>Thank you for your business!</p>
+                    </div>
+
+                    <div class="payment-info">
+                        <h4>Payment Information</h4>
+                        <p>Please make payment via bank transfer to:</p>
+                        <p>Bank: Example Bank</p>
+                        <p>Account: 1234567890</p>
+                        <p>IFSC: EXBK0012345</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 BillMaster. All rights reserved.</p>
+    </footer>
+
+    <script>
+        async function sendReminder(id) {
+            try {
+                const response = await fetch(`/invoices/${id}/resend`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    alert('Reminder sent successfully!');
+                } else {
+                    alert('Failed to send reminder: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to send reminder');
+            }
+        }
+
+        async function updateStatus(id, status) {
+            try {
+                if (!confirm(`Are you sure you want to mark this invoice as ${status}?`)) {
+                    return;
+                }
+
+                const response = await fetch(`/invoices/${id}/status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ status })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    throw new Error(data.message || 'Failed to update status');
+                }
+            } catch (error) {
+                console.error('Error updating status:', error);
+                alert('Failed to update status: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html> 

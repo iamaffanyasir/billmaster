@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - BillMaster</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/theme.css">
+</head>
+<body>
+    <%- include('./partials/nav.ejs') %>
+
+    <main>
+        <div class="container">
+            <!-- Header Section -->
+            <section class="settings-header">
+                <div class="section-header">
+                    <div class="header-content">
+                        <div>
+                            <h2>Settings & Preferences</h2>
+                            <p class="text-secondary">Configure your application settings and preferences</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Settings Grid -->
+            <div class="settings-grid">
+                <!-- System Settings Section -->
+                <section class="settings-section">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="header-with-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                                </svg>
+                                <h2>System Settings</h2>
+                            </div>
+                            <p class="text-secondary">Configure basic system preferences</p>
+                        </div>
+                        <div class="card-content">
+                            <form id="systemSettingsForm" class="settings-form">
+                                <div class="form-group">
+                                    <label for="dateFormat">Date Format</label>
+                                    <select id="dateFormat" name="dateFormat" class="select-custom">
+                                        <option value="DD/MM/YYYY">DD/MM/YYYY</option>
+                                        <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+                                        <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="currency">Default Currency</label>
+                                    <select id="currency" name="currency" class="select-custom">
+                                        <option value="INR">INR (₹)</option>
+                                        <option value="USD">USD ($)</option>
+                                        <option value="EUR">EUR (€)</option>
+                                        <option value="GBP">GBP (£)</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="timezone">Time Zone</label>
+                                    <select id="timezone" name="timezone" class="select-custom">
+                                        <option value="Asia/Kolkata">India (GMT+5:30)</option>
+                                        <option value="UTC">UTC</option>
+                                        <option value="America/New_York">Eastern Time</option>
+                                        <option value="Europe/London">London</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-actions">
+                                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Email Settings Section -->
+                <section class="settings-section">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="header-with-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                    <polyline points="22,6 12,13 2,6"></polyline>
+                                </svg>
+                                <h2>Email Settings</h2>
+                            </div>
+                            <p class="text-secondary">Configure email notifications</p>
+                        </div>
+                        <div class="card-content">
+                            <form id="emailSettingsForm" class="settings-form">
+                                <div class="form-group">
+                                    <label for="emailService">Email Service</label>
+                                    <input type="text" id="emailService" name="emailService" 
+                                           value="<%= emailSettings.emailService %>" readonly class="input-readonly">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="emailUser">Email Address</label>
+                                    <input type="email" id="emailUser" name="emailUser" 
+                                           value="<%= emailSettings.emailUser %>" readonly class="input-readonly">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="testEmail">Test Email Configuration</label>
+                                    <div class="input-with-button">
+                                        <input type="email" id="testEmail" name="testEmail" 
+                                               placeholder="Enter email for testing">
+                                        <button type="button" id="testEmailBtn" class="btn btn-primary">
+                                            Send Test Email
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 BillMaster. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Test Email Functionality
+        document.getElementById('testEmailBtn').addEventListener('click', async () => {
+            const testEmail = document.getElementById('testEmail').value;
+            if (!testEmail) {
+                alert('Please enter an email address for testing');
+                return;
+            }
+
+            try {
+                const response = await fetch('/settings/test-email', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ testEmail })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Test email sent successfully! Please check your inbox.');
+                } else {
+                    alert('Failed to send test email: ' + data.message);
+                }
+            } catch (error) {
+                alert('Error sending test email: ' + error.message);
+            }
+        });
+
+        // Save settings handler
+        document.getElementById('systemSettingsForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const settings = Object.fromEntries(formData);
+            
+            try {
+                const response = await fetch('/settings/system', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(settings)
+                });
+                
+                if (response.ok) {
+                    alert('Settings saved successfully!');
+                } else {
+                    alert('Failed to save settings');
+                }
+            } catch (error) {
+                alert('Error saving settings: ' + error.message);
+            }
+        });
+    </script>
+</body>
+</html> 

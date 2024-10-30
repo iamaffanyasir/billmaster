@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create New Invoice - BillMaster</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/theme.css">
+</head>
+<body>
+    <%- include('../partials/nav.ejs') %>
+
+    <main>
+        <div class="container">
+            <section class="invoice-form">
+                <div class="section-header">
+                    <h2>Create New Invoice</h2>
+                </div>
+
+                <div class="card">
+                    <form action="/invoices" method="POST" id="invoiceForm">
+                        <div class="form-group">
+                            <label for="clientId">Select Client:*</label>
+                            <select id="clientId" name="clientId" required>
+                                <option value="">-- Select a Client --</option>
+                                <% if (clients && clients.length > 0) { %>
+                                    <% clients.forEach(function(client) { %>
+                                        <option value="<%= client._id %>">
+                                            <%= client.name %> 
+                                            <%= client.company ? `(${client.company})` : '' %>
+                                        </option>
+                                    <% }); %>
+                                <% } %>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="projectId">Select Project:*</label>
+                            <select id="projectId" name="projectId" required>
+                                <option value="">-- Select a Project --</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="amount">Amount ($):*</label>
+                            <input type="number" id="amount" name="amount" step="0.01" required min="0">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="dueDate">Due Date:*</label>
+                            <input type="date" id="dueDate" name="dueDate" required 
+                                   min="<%= new Date().toISOString().split('T')[0] %>">
+                        </div>
+
+                        <div id="items-container">
+                            <h3>Invoice Items</h3>
+                            <div class="invoice-item card">
+                                <div class="form-group">
+                                    <label>Description:</label>
+                                    <input type="text" name="items[0][description]" required>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group half">
+                                        <label>Quantity:</label>
+                                        <input type="number" name="items[0][quantity]" min="1" value="1" required>
+                                    </div>
+                                    <div class="form-group half">
+                                        <label>Rate ($):</label>
+                                        <input type="number" name="items[0][rate]" step="0.01" min="0" required>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="button" class="btn btn-secondary" onclick="addItem()">Add Another Item</button>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Create & Send Invoice</button>
+                            <a href="/invoices" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 BillMaster. All rights reserved.</p>
+    </footer>
+
+    <script>
+        let itemCount = 1;
+
+        function addItem() {
+            const container = document.getElementById('items-container');
+            const newItem = document.createElement('div');
+            newItem.className = 'invoice-item card';
+            newItem.innerHTML = `
+                <div class="form-group">
+                    <label>Description:</label>
+                    <input type="text" name="items[${itemCount}][description]" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group half">
+                        <label>Quantity:</label>
+                        <input type="number" name="items[${itemCount}][quantity]" min="1" value="1" required>
+                    </div>
+                    <div class="form-group half">
+                        <label>Rate ($):</label>
+                        <input type="number" name="items[${itemCount}][rate]" step="0.01" min="0" required>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-danger" onclick="this.parentElement.remove()">Remove Item</button>
+            `;
+            container.appendChild(newItem);
+            itemCount++;
+        }
+
+        // Update project options when client is selected
+        document.getElementById('clientId').addEventListener('change', async function() {
+            const clientId = this.value;
+            const projectSelect = document.getElementById('projectId');
+            
+            projectSelect.innerHTML = '<option value="">-- Select a Project --</option>';
+            
+            if (clientId) {
+                try {
+                    const response = await fetch(`/projects/client/${clientId}`);
+                    const projects = await response.json();
+                    
+                    projects.forEach(project => {
+                        const option = document.createElement('option');
+                        option.value = project._id;
+                        option.textContent = project.name;
+                        projectSelect.appendChild(option);
+                    });
+                } catch (error) {
+                    console.error('Error fetching projects:', error);
+                }
+            }
+        });
+
+        // Calculate total amount when items change
+        document.getElementById('invoiceForm').addEventListener('input', function(e) {
+            if (e.target.name.includes('quantity') || e.target.name.includes('rate')) {
+                let total = 0;
+                const items = document.getElementsByClassName('invoice-item');
+                
+                Array.from(items).forEach(item => {
+                    const quantity = parseFloat(item.querySelector('input[name*="quantity"]').value) || 0;
+                    const rate = parseFloat(item.querySelector('input[name*="rate"]').value) || 0;
+                    total += quantity * rate;
+                });
+
+                document.getElementById('amount').value = total.toFixed(2);
+            }
+        });
+    </script>
+</body>
+</html> 

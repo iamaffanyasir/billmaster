@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Client - BillMaster</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/theme.css">
+</head>
+<body>
+    <%- include('../partials/nav.ejs') %>
+
+    <main>
+        <div class="container">
+            <section class="client-form">
+                <div class="section-header">
+                    <h2>Edit Client</h2>
+                </div>
+
+                <div class="card">
+                    <form id="editClientForm" class="form">
+                        <div class="form-group">
+                            <label for="clientName">Client Name:</label>
+                            <input type="text" id="clientName" name="clientName" value="<%= client.name %>" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email">Email:</label>
+                            <input type="email" id="email" name="email" value="<%= client.email %>" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="phone">Phone Number:</label>
+                            <input type="tel" id="phone" name="phone" value="<%= client.phone %>">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="company">Company Name:</label>
+                            <input type="text" id="company" name="company" value="<%= client.company %>">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="address">Address:</label>
+                            <textarea id="address" name="address" rows="3"><%= client.address %></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="notes">Additional Notes:</label>
+                            <textarea id="notes" name="notes" rows="3"><%= client.notes %></textarea>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Update Client</button>
+                            <a href="/clients" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 BillMaster. All rights reserved.</p>
+    </footer>
+
+    <script>
+        document.getElementById('editClientForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData.entries());
+            
+            try {
+                const response = await fetch('/clients/<%= client.id %>', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    window.location.href = '/clients';
+                } else {
+                    throw new Error('Failed to update client');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to update client');
+            }
+        });
+    </script>
+</body>
+</html> 

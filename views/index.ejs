@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - BillMaster</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/theme.css">
+</head>
+<body>
+    <%- include('./partials/nav.ejs') %>
+
+    <main>
+        <div class="container">
+            <!-- Overview Section -->
+            <section class="dashboard-header">
+                <div class="section-header">
+                    <h2>Dashboard Overview</h2>
+                    <p class="text-secondary">Welcome to your business management center</p>
+                </div>
+            </section>
+
+            <!-- Quick Stats -->
+            <section class="dashboard-grid">
+                <div class="dashboard-card">
+                    <div class="stat-icon revenue">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <line x1="12" y1="1" x2="12" y2="23"></line>
+                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                        </svg>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Total Revenue</h3>
+                        <p class="stat-value">₹<%= typeof totalRevenue !== 'undefined' ? totalRevenue.toLocaleString() : '0' %></p>
+                        <p class="stat-label">Current Month</p>
+                    </div>
+                </div>
+
+                <div class="dashboard-card">
+                    <div class="stat-icon clients">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Active Clients</h3>
+                        <p class="stat-value"><%= typeof clients !== 'undefined' ? clients.length : 0 %></p>
+                        <p class="stat-label">Total Clients</p>
+                    </div>
+                </div>
+
+                <div class="dashboard-card">
+                    <div class="stat-icon projects">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Active Projects</h3>
+                        <p class="stat-value"><%= typeof projectStats !== 'undefined' ? projectStats.ongoing : 0 %></p>
+                        <p class="stat-label">Out of <%= typeof projectStats !== 'undefined' ? projectStats.total : 0 %> Total</p>
+                    </div>
+                </div>
+
+                <div class="dashboard-card">
+                    <div class="stat-icon invoices">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                            <line x1="1" y1="10" x2="23" y2="10"></line>
+                        </svg>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Pending Invoices</h3>
+                        <p class="stat-value"><%= typeof invoiceStats !== 'undefined' ? invoiceStats.pending : 0 %></p>
+                        <p class="stat-label warning"><%= typeof invoiceStats !== 'undefined' ? invoiceStats.overdue : 0 %> Overdue</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Recent Activity -->
+            <section class="dashboard-recent">
+                <div class="section-header">
+                    <h2>Recent Activity</h2>
+                </div>
+                <div class="card">
+                    <div class="activity-list">
+                        <% if (typeof recentActivity !== 'undefined' && recentActivity.length > 0) { %>
+                            <% recentActivity.forEach(activity => { %>
+                                <div class="activity-item">
+                                    <div class="activity-icon <%= activity.type %>">
+                                        <% if (activity.type === 'invoice') { %>
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                                <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                                                <line x1="1" y1="10" x2="23" y2="10"></line>
+                                            </svg>
+                                        <% } else if (activity.type === 'project') { %>
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                                            </svg>
+                                        <% } else { %>
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                                <circle cx="12" cy="12" r="10"></circle>
+                                                <line x1="12" y1="16" x2="12" y2="12"></line>
+                                                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                                            </svg>
+                                        <% } %>
+                                    </div>
+                                    <div class="activity-details">
+                                        <p class="activity-text"><%= activity.description %></p>
+                                        <span class="activity-time"><%= new Date(activity.createdAt).toLocaleDateString() %></span>
+                                    </div>
+                                </div>
+                            <% }); %>
+                        <% } else { %>
+                            <p class="no-data">No recent activity</p>
+                        <% } %>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 BillMaster. All rights reserved.</p>
+    </footer>
+</body>
+</html> 
